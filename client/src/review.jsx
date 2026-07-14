@@ -25,6 +25,7 @@ function Review({ session }) {
 
   const handleReview = async () => {
     setLoading(true)
+    setResult(null)
     try {
       const res = await fetch('http://localhost:5000/api/review', {
         method: 'POST',
@@ -37,7 +38,9 @@ function Review({ session }) {
       const data = await res.json()
       setResult(data)
     } catch {
-      setResult({ error: 'Could not reach the server' })
+      setResult({
+        error: 'Could not reach the server. Make sure the backend is running.',
+      })
     }
     setLoading(false)
   }
