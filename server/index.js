@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
+const { analyzeJavaScript } = require('./analyzer');
 
 const app = express();
 app.use(cors());
@@ -43,12 +44,26 @@ app.post('/api/review', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Code too large (max 50KB)' });
   }
 
-  // abhi ke liye simple result (Day 6 pe ESLint, Day 8 pe AI yahan judenge)
+  // STAGE 1: Static Analysis (ESLint)
+  let staticIssues = [];
+  if (language === 'javascript') {
+    try {
+      staticIssues = analyzeJavaScript(code);
+    } catch (e) {
+      console.log('Analyzer error:', e.message);
+    }
+  }
+
   const reviewResult = {
-    message: 'Code received successfully',
     language: language || 'unknown',
     characters: code.length,
     lines: code.split('\n').length,
+    static_analysis: {
+      total_issues: staticIssues.length,
+      errors: staticIssues.filter((i) => i.severity === 'error').length,
+      warnings: staticIssues.filter((i) => i.severity === 'warning').length,
+      issues: staticIssues,
+    },
   };
 
   // USER KE NAAM SE database mein save karo
