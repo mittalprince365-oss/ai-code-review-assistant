@@ -24,6 +24,10 @@ function Review({ session }) {
   }
 
   const handleReview = async () => {
+    if (code.length > 50000) {
+      setResult({ error: 'Code is too large (max 50KB). Please review a smaller file.' })
+      return
+    }
     setLoading(true)
     setResult(null)
     try {
@@ -137,7 +141,7 @@ function Review({ session }) {
 
       <button
         onClick={handleReview}
-        disabled={loading}
+        disabled={loading || !code.trim()}
         className="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-medium disabled:opacity-50"
       >
         {loading ? '🤖 AI is reviewing your code...' : 'Review Code'}

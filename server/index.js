@@ -132,6 +132,11 @@ app.post('/api/docs', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Could not generate documentation' });
   }
 });
+// SAFETY NET: koi bhi ansochi error aaye toh crash mat karo
+app.use((err, req, res, next) => {
+  console.log('Unexpected error:', err.message);
+  res.status(500).json({ error: 'Something went wrong on the server' });
+});
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
