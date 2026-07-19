@@ -7,6 +7,9 @@ function Review({ session }) {
   const [loading, setLoading] = useState(false)
   const [fileName, setFileName] = useState('')
   const [copied, setCopied] = useState(false)
+  const [docs, setDocs] = useState(null)
+  const [docsLoading, setDocsLoading] = useState(false)
+  const [docsCopied, setDocsCopied] = useState(false)
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]
@@ -46,6 +49,31 @@ function Review({ session }) {
     navigator.clipboard.writeText(ai.improved_code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+  const handleGenerateDocs = async () => {
+    setDocsLoading(true)
+    setDocs(null)
+    try {
+      const res = await fetch('http://localhost:5000/api/docs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ code, language }),
+      })
+      const data = await res.json()
+      setDocs(data)
+    } catch {
+      setDocs({ error: 'Could not reach the server.' })
+    }
+    setDocsLoading(false)
+  }
+
+  const copyDocs = () => {
+    navigator.clipboard.writeText(docs.documented_code)
+    setDocsCopied(true)
+    setTimeout(() => setDocsCopied(false), 2000)
   }
 
   const sa = result?.static_analysis
@@ -114,6 +142,44 @@ function Review({ session }) {
       >
         {loading ? '🤖 AI is reviewing your code...' : 'Review Code'}
       </button>
+      <button
+        onClick={handleGenerateDocs}
+        disabled={docsLoading || !code.trim()}
+        className="mt-3 ml-3 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded font-medium disabled:opacity-50"
+      >
+        {docsLoading ? '📝 Generating docs...' : '📝 Generate Docs'}
+      </button>
+
+      {docs?.error && (
+        <div className="mt-4 bg-red-900/40 border border-red-700 text-red-300 p-4 rounded">
+          ⚠️ {docs.error}
+        </div>
+      )}
+
+      {docs?.documented_code && (
+        <div className="mt-6">
+          <h2 className="text-lg font-bold text-white mb-3">
+            📝 Generated Documentation
+          </h2>
+          <div className="bg-gray-800 border border-purple-900 rounded-lg p-4 mb-3">
+            <p className="text-gray-300">{docs.overview}</p>
+          </div>
+          <div className="bg-gray-800 border border-purple-900 rounded-lg overflow-hidden">
+            <div className="flex justify-between items-center px-4 py-3 bg-gray-900">
+              <span className="text-white font-semibold">Documented Code</span>
+              <button
+                onClick={copyDocs}
+                className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm"
+              >
+                {docsCopied ? '✓ Copied!' : '📋 Copy'}
+              </button>
+            </div>
+            <pre className="p-4 text-sm text-purple-200 font-mono overflow-auto">
+              {docs.documented_code}
+            </pre>
+          </div>
+        </div>
+      )}
 
       {result?.error && (
         <div className="mt-4 bg-red-900/40 border border-red-700 text-red-300 p-4 rounded">

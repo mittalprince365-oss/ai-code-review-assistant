@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 const { analyzeJavaScript } = require('./analyzer');
 const { aiReview } = require('./aiReviewer');
+const { generateDocs } = require('./docGenerator');
 
 const app = express();
 app.use(cors());
@@ -112,6 +113,24 @@ app.post('/api/review', requireAuth, async (req, res) => {
     review_id: saved.id,
     saved: true,
   });
+});
+// docs route - AI se documentation banwao
+app.post('/api/docs', requireAuth, async (req, res) => {
+  const { code, language } = req.body;
+  if (!code || !code.trim()) {
+    return res.status(400).json({ error: 'No code provided' });
+  }
+  if (code.length > 50000) {
+    return res.status(400).json({ error: 'Code too large (max 50KB)' });
+  }
+
+  try {
+    const docs = await generateDocs(code, language || 'javascript');
+    res.json(docs);
+  } catch (e) {
+    console.log('Docs error:', e.message);
+    res.status(500).json({ error: 'Could not generate documentation' });
+  }
 });
 
 const PORT = 5000;
