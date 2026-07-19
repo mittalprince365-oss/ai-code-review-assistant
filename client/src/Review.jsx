@@ -31,7 +31,7 @@ function Review({ session }) {
     setLoading(true)
     setResult(null)
     try {
-      const res = await fetch('http://localhost:5000/api/review', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ function Review({ session }) {
     setDocsLoading(true)
     setDocs(null)
     try {
-      const res = await fetch('http://localhost:5000/api/docs', {
+       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/docs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
