@@ -3,6 +3,7 @@ const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 const { analyzeJavaScript } = require('./analyzer');
+const { aiReview } = require('./aiReviewer');
 
 const app = express();
 app.use(cors());
@@ -34,7 +35,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-// review route - ab database mein bhi save karega
+// review route - static analysis + AI review + database save
 app.post('/api/review', requireAuth, async (req, res) => {
   const { code, language } = req.body;
   if (!code || !code.trim()) {
@@ -54,6 +55,20 @@ app.post('/api/review', requireAuth, async (req, res) => {
     }
   }
 
+  // STAGE 2: AI Review (Gemini)
+  let aiResult = null;
+  try {
+    aiResult = await aiReview(code, language, staticIssues);
+  } catch (e) {
+    console.log('AI review error:', e.message);
+    aiResult = {
+      summary: 'AI review unavailable',
+      complexity: 'unknown',
+      issues: [],
+      improved_code: null,
+    };
+  }
+
   const reviewResult = {
     language: language || 'unknown',
     characters: code.length,
@@ -64,6 +79,7 @@ app.post('/api/review', requireAuth, async (req, res) => {
       warnings: staticIssues.filter((i) => i.severity === 'warning').length,
       issues: staticIssues,
     },
+    ai_review: aiResult,
   };
 
   // USER KE NAAM SE database mein save karo
