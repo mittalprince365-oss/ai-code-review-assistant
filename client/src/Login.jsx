@@ -21,6 +21,8 @@ function Login() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
+        <p className="text-blue-500 font-bold text-center mb-2">⚡ AI Code Review Assistant</p>
+        <p className="text-gray-500 text-sm text-center mb-6">Sign in to analyze your code</p>
         <h1 className="text-2xl font-bold text-white mb-6">
           {isSignup ? 'Create Account' : 'Sign In'}
         </h1>
