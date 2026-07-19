@@ -1,4 +1,6 @@
 # ⚡ AI Code Review Assistant
+🌍 **Live Demo:**  https://ai-code-review-assistant-amber.vercel.app
+🔗 **API:** https://ai-code-review-assistant-0t00.onrender.com
 
 A full-stack web application that reviews code automatically using a two-stage pipeline: static analysis (ESLint) followed by AI-powered review (Google Gemini). Users sign in, paste or upload code, and get instant feedback on bugs, code quality, complexity, and best practices — with auto-generated documentation and full review history.
 
